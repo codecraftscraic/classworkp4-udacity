@@ -17,13 +17,14 @@ import endpoints
 from protorpc import messages
 from google.appengine.ext import ndb
 
+# - - - Profiles - - - - - - - - - - - - - - - - - - - - - - -
 
 class Profile(ndb.Model):
     """Profile -- User profile object"""
-    userId = ndb.StringProperty()
     displayName = ndb.StringProperty()
     mainEmail = ndb.StringProperty()
     teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
+    conferenceKeysToAttend = ndb.StringProperty(repeated=True)
 
 
 class ProfileMiniForm(messages.Message):
@@ -38,7 +39,7 @@ class ProfileForm(messages.Message):
     displayName = messages.StringField(2)
     mainEmail = messages.StringField(3)
     teeShirtSize = messages.EnumField('TeeShirtSize', 4)
-
+    conferenceKeysToAttend = messages.StringField(4, repeated=True)
 
 class TeeShirtSize(messages.Enum):
     """TeeShirtSize -- t-shirt size enumeration value"""
@@ -57,6 +58,8 @@ class TeeShirtSize(messages.Enum):
     XXL_W = 13
     XXXL_M = 14
     XXXL_W = 15
+
+# - - - Conferences - - - - - - - - - - - - - -
 
 class Conference(ndb.Model):
     """Conference -- Conference object"""
@@ -100,3 +103,67 @@ class ConferenceQueryForms(messages.Message):
     """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form message"""
     filters = messages.MessageField(ConferenceQueryForm, 1, repeated=True)
 
+# - - - Sessions - - - - - - - - - - - - - - - -
+
+class Session(ndb.Model):
+    sessionName   = messages.StringProperty(required=True)
+    highlights    = messages.StringProperty()
+    speaker       = messages.StringProperty(required=True, repeated=True)
+    duration      = messages.IntegerProperty()
+    typeOfSession = messages.StringProperty(repeated=True)
+    sessionDate   = messages.DateProperty()
+    startTime     = messages.TimeProperty()
+
+class SessionTypes(messages.Enum):
+    """SessionTypes -- typeOfSession enumeration value"""
+    WORKSHOP = 1
+    LECTURE = 2
+    KEYNOTE = 3
+
+class SessionForm(messages.Message):
+    sessionName   = messages.StringField(1)
+    highlights    = messages.StringField(2)
+    speakerUserId = messages.StringField(3, repeated=True)
+    duration      = messages.IntegerField(4)
+    typeOfSession = messages.EnumField('SessionTypes', 5)
+    sessionDate   = messages.StringField(6)
+    startTime     = messages.StringField(7) #24hr for sort
+    speakerDisplayName = messages.StringField(8)
+    websafeKey    = messages.StringField(9)
+
+class SessionForms(messages.Message):
+    """SessionForms -- multiple Session outbound form message"""
+    items = messages.MessageField(SessionForm, 1, repeated=True)
+
+# - - - Speakers - - - - - - - - - - - - - - - - - - - - - - -
+
+class Speaker(ndb.Model):
+    """Speaker -- object"""    
+    displayName = ndb.StringProperty(required=True)
+    profileKey = ndb.StringProperty() #for speaker/attendees
+    bio = ndb.StringProperty()
+
+class SpeakerForm(messages.Message):
+    """SpeakerForm -- create form message"""
+    displayName = messages.StringField(1)
+    profileKey = messages.StringField(2)
+    bio = messages.StringField(3)
+    websafeKey = messages.StringField(4)
+
+class SpeakerForms(messages.Message):
+    """SpeakerForm -- multiple form messages out"""
+    items = messages.MessageField(SpeakerForm, 1, repeated=True)
+
+# - - - Misc - - - - - - - - - - - - - - - - - - - - - - - -
+
+class BooleanMessage(messages.Message):
+    """BooleanMessage-- outbound Boolean value message"""
+    data = messages.BooleanField(1)
+
+class ConflictException(endpoints.ServiceException):
+    """ConflictException -- exception mapped to HTTP 409 response"""
+    http_status = httplib.CONFLICT
+
+class StringMessage(messages.Message):
+    """StringMessage-- outbound (single) string message"""
+    data = messages.StringField(1, required=True)

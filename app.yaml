@@ -34,8 +34,18 @@ handlers:       # static then dynamic
   script: conference.api
   secure: always
 
+- url: /crons/set_announcement
+  script: main.app
+  login: admin
+
+- url: /tasks/send_confirmation_email
+  script: main.app
+  login: admin
+
 libraries:
 
+- name: webapp2
+  version: latest
 - name: endpoints
   version: latest
 
