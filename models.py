@@ -25,7 +25,7 @@ class Profile(ndb.Model):
     mainEmail = ndb.StringProperty()
     teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
     conferenceKeysToAttend = ndb.StringProperty(repeated=True)
-
+    sessionsToAttend = ndb.KeyProperty(Session, repeated=True)
 
 class ProfileMiniForm(messages.Message):
     """ProfileMiniForm -- update Profile form message"""
@@ -39,7 +39,7 @@ class ProfileForm(messages.Message):
     displayName = messages.StringField(2)
     mainEmail = messages.StringField(3)
     teeShirtSize = messages.EnumField('TeeShirtSize', 4)
-    conferenceKeysToAttend = messages.StringField(4, repeated=True)
+    conferenceKeysToAttend = messages.StringField(5, repeated=True)
 
 class TeeShirtSize(messages.Enum):
     """TeeShirtSize -- t-shirt size enumeration value"""
@@ -106,13 +106,13 @@ class ConferenceQueryForms(messages.Message):
 # - - - Sessions - - - - - - - - - - - - - - - -
 
 class Session(ndb.Model):
-    sessionName   = messages.StringProperty(required=True)
-    highlights    = messages.StringProperty()
-    speaker       = messages.StringProperty(required=True, repeated=True)
-    duration      = messages.IntegerProperty()
-    typeOfSession = messages.StringProperty(repeated=True)
-    sessionDate   = messages.DateProperty()
-    startTime     = messages.TimeProperty()
+    sessionName   = ndb.StringProperty(required=True)
+    highlights    = ndb.StringProperty()
+    speaker       = ndb.StringProperty(repeated=True)
+    duration      = ndb.IntegerProperty()
+    typeOfSession = ndb.StringProperty(repeated=True)
+    sessionDate   = ndb.DateProperty()
+    startTime     = ndb.TimeProperty()
 
 class SessionTypes(messages.Enum):
     """SessionTypes -- typeOfSession enumeration value"""
@@ -123,7 +123,7 @@ class SessionTypes(messages.Enum):
 class SessionForm(messages.Message):
     sessionName   = messages.StringField(1)
     highlights    = messages.StringField(2)
-    speakerUserId = messages.StringField(3, repeated=True)
+    speakerUserId = messages.StringField(3, required=True)
     duration      = messages.IntegerField(4)
     typeOfSession = messages.EnumField('SessionTypes', 5)
     sessionDate   = messages.StringField(6)
